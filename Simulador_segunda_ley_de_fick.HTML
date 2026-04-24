@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SimuMetalurgia - Segunda Ley de Fick - </title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --bg-color: #f4f7f6;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12pt;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px;
+            background: var(--primary-color);
+            color: white;
+            width: 100%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .credits-box {
+            border: 2px solid white;
+            padding: 10px;
+            margin-top: 10px;
+            display: inline-block;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+        }
+
+        nav { margin: 20px 0; }
+        nav button {
+            padding: 12px 25px;
+            cursor: pointer;
+            border: none;
+            background: var(--secondary-color);
+            color: white;
+            margin: 0 5px;
+            border-radius: 5px;
+            transition: 0.3s;
+            font-weight: bold;
+        }
+        nav button:hover { background: var(--accent-color); }
+
+        .section {
+            display: none;
+            width: 95%;
+            max-width: 1300px;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+        }
+        .active { display: block; }
+
+        .main-layout { display: flex; flex-wrap: wrap; gap: 25px; align-items: flex-start; }
+        .inputs-panel { flex: 1; min-width: 350px; background: #fff; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .charts-panel { flex: 2; min-width: 450px; display: flex; flex-direction: column; gap: 20px; }
+
+        .input-group { margin-bottom: 12px; }
+        label { display: block; margin-bottom: 4px; font-weight: bold; font-size: 0.9em; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 1em; }
+
+        .btn-calc {
+            width: 100%; padding: 15px; background: #27ae60; color: white; border: none;
+            border-radius: 5px; font-size: 1.1em; cursor: pointer; margin-top: 15px; transition: 0.3s;
+        }
+        .btn-calc:hover { background: #219150; }
+
+        .results-area { margin-top: 15px; padding: 15px; background: #e8f6f3; border-left: 5px solid #27ae60; font-size: 0.95em; }
+        .interp-details { margin-top: 10px; padding: 12px; background: #fcf3cf; border: 1px solid #f1c40f; border-radius: 5px; font-size: 0.85em; display: none; }
+        
+        .chart-box { background: #fff; padding: 15px; border: 1px solid #eee; border-radius: 8px; text-align: center; }
+        .chart-box h3 { margin-top: 0; color: var(--primary-color); font-size: 1.1em; border-bottom: 2px solid var(--bg-color); padding-bottom: 10px; }
+
+        .interactive-controls {
+            display: flex; gap: 10px; justify-content: center; margin-top: 10px;
+            background: #f9f9f9; padding: 10px; border-radius: 5px;
+        }
+        .interactive-controls input { width: 100px; text-align: center; }
+
+        .theory-content img { max-width: 100%; height: auto; display: block; margin: 20px auto; border-radius: 5px; }
+        .sub-nav { margin-bottom: 20px; border-bottom: 2px solid #ddd; display: flex; gap: 10px; }
+        .sub-nav span { padding: 10px 20px; cursor: pointer; display: inline-block; border-radius: 5px 5px 0 0; transition: 0.2s; background: #f8f9fa; color: #555; border: 1px solid transparent; }
+        .sub-nav span:hover { background: #eef2f5; }
+        .active-sub { background: white !important; border: 1px solid #ddd !important; border-bottom: 3px solid var(--accent-color) !important; font-weight: bold; color: var(--primary-color) !important; }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: var(--primary-color);
+            color: white;
+            width: 100%;
+            margin-top: auto;
+            font-size: 0.9em;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Segunda Ley de Fick</h1>
+</header>
+
+<nav>
+    <button onclick="showSection('inicio')">Inicio</button>
+    <button onclick="showSection('calc')">Simulador</button>
+    <button onclick="showSection('theory')">Teoría y Aplicaciones</button>
+</nav>
+
+<div id="inicio" class="section active">
+    <div style="text-align: center; margin-bottom: 40px; padding: 20px;">
+        <h2 style="color: #2c3e50; font-size: 2.5em; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">Bienvenido al Módulo interactivo de la segunda ley de Fick.</h2>
+        <p style="color: #7f8c8d; font-size: 1.2em; max-width: 850px; margin: 0 auto; line-height: 1.6;">Plataforma interactiva integral para el cálculo, diseño y análisis de tratamientos termoquímicos y procesos de difusión en estado no estacionario.</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; max-width: 1100px; margin: 0 auto; padding-bottom: 30px;">
+        
+        <div style="background: white; border: 1px solid #e1e8ed; padding: 35px 25px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); text-align: center; transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+            <div style="font-size: 3.5em; margin-bottom: 15px;"></div>
+            <h3 style="color: #27ae60; margin-top: 0; font-size: 1.4em;">Módulo de Simulación</h3>
+            <p style="color: #666; font-size: 0.95em; margin-bottom: 25px; line-height: 1.5; height: 80px;">Motor matemático para calcular variables térmicas (Cs, C0, Cx, x, D, t). Genera automáticamente gráficos del perfil de concentración y la cinética de penetración.</p>
+            <button onclick="showSection('calc')" style="background: #27ae60; color: white; border: none; padding: 12px 25px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">Abrir Simulador</button>
+        </div>
+
+        <div style="background: white; border: 1px solid #e1e8ed; padding: 35px 25px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); text-align: center; transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+            <div style="font-size: 3.5em; margin-bottom: 15px;"></div>
+            <h3 style="color: #3498db; margin-top: 0; font-size: 1.4em;">Fundamentos Teóricos</h3>
+            <p style="color: #666; font-size: 0.95em; margin-bottom: 25px; line-height: 1.5; height: 80px;">Bases matemáticas de las Leyes de Fick, uso riguroso de la Función Error de Gauss y análisis de viabilidad microestructural mediante el diagrama Fe-C.</p>
+            <button onclick="showSection('theory'); showSubTheory('t');" style="background: #3498db; color: white; border: none; padding: 12px 25px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">Estudiar Teoría</button>
+        </div>
+
+        <div style="background: white; border: 1px solid #e1e8ed; padding: 35px 25px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); text-align: center; transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+            <div style="font-size: 3.5em; margin-bottom: 15px;"></div>
+            <h3 style="color: #e67e22; margin-top: 0; font-size: 1.4em;">Aplicaciones Industriales</h3>
+            <p style="color: #666; font-size: 0.95em; margin-bottom: 25px; line-height: 1.5; height: 80px;">Estudio detallado de los tratamientos termoquímicos de la industria moderna, profundizando en los mecanismos de endurecimiento por Cementación y Nitruración.</p>
+            <button onclick="showSection('theory'); showSubTheory('a');" style="background: #e67e22; color: white; border: none; padding: 12px 25px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">Ver Aplicaciones</button>
+        </div>
+
+        <div style="background: white; border: 1px solid #e1e8ed; padding: 35px 25px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); text-align: center; transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+            <div style="font-size: 3.5em; margin-bottom: 15px;"></div>
+            <h3 style="color: #9b59b6; margin-top: 0; font-size: 1.4em;">Manual de Operación</h3>
+            <p style="color: #666; font-size: 0.95em; margin-bottom: 25px; line-height: 1.5; height: 80px;">Documentación técnica exhaustiva para el usuario. Aprenda cómo ingresar datos correctamente, evitar errores de sintaxis y usar las sondas interactivas.</p>
+            <button onclick="showSection('theory'); showSubTheory('m');" style="background: #9b59b6; color: white; border: none; padding: 12px 25px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">Leer Manual</button>
+        </div>
+
+    </div>
+</div>
+<div id="calc" class="section"> <div class="main-layout">
+        <div class="inputs-panel">
+            <h3>Parámetros de Entrada</h3>
+            <div class="input-group">
+                <label>Variable Incógnita:</label>
+                <select id="incognita" onchange="toggleInputs()">
+                    <option value="">Seleccione...</option>
+                    <option value="Cs">Cs (Concentración superficial)</option>
+                    <option value="C0">C0 (Concentración inicial)</option>
+                    <option value="Cx">Cx (Concentración a distancia x)</option>
+                    <option value="x">x (Distancia/Profundidad)</option>
+                    <option value="D">D (Difusividad)</option>
+                    <option value="t">t (Tiempo)</option>
+                </select>
+            </div>
+
+            <div id="inputsContainer">
+                <div class="input-group" id="group-Cs"><label>Cs (% átomos):</label><input type="text" id="val-Cs" value=""></div>
+                <div class="input-group" id="group-C0"><label>C0 (% átomos):</label><input type="text" id="val-C0" value=""></div>
+                <div class="input-group" id="group-Cx"><label>Cx (% átomos):</label><input type="text" id="val-Cx" value=""></div>
+                <div class="input-group" id="group-x">
+                    <label>Distancia x:</label>
+                    <input type="text" id="val-x" value="">
+                    <select id="unit-x">
+                        <option value="m">m</option><option value="cm">cm</option><option value="mm">mm</option>
+                        <option value="in">in</option>
+                    </select>
+                </div>
+                <div class="input-group" id="group-D">
+                    <label>Difusividad D (m²/s):</label>
+                    <input type="text" id="val-D" value="">
+                </div>
+                <div class="input-group" id="group-t">
+                    <label>Tiempo t:</label>
+                    <input type="text" id="val-t" value="">
+                    <select id="unit-t">
+                        <option value="s">s</option><option value="min">min</option><option value="h">h</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="unit-incognita-container" style="display:none; border: 1px dashed #3498db; padding: 10px; margin-top: 10px;">
+                <label>Unidad de salida deseada:</label>
+                <select id="res-unit"></select>
+            </div>
+
+            <button class="btn-calc" onclick="calcular()">CALCULAR Y GENERAR RESULTADOS</button>
+            
+            <div class="results-area" id="resultado" style="display:none;"></div>
+            <div class="interp-details" id="interp-box"></div>
+        </div>
+
+        <div class="charts-panel">
+            <div class="chart-box">
+                <h3>Perfil de Concentración de Soluto</h3>
+                <canvas id="chart1"></canvas>
+                <div class="interactive-controls">
+                    <div><label id="lbl-probe-x">Explorar x (mm):</label><input type="text" id="probe-x"></div>
+                    <div><label>%C result:</label><input type="text" id="probe-c" readonly></div>
+                </div>
+            </div>
+            
+            <div class="chart-box">
+                <h3>Cinética de Penetración (Profundidad de capa tratada)</h3>
+                <canvas id="chart2"></canvas>
+                <div class="interactive-controls">
+                    <div><label id="lbl-probe-t-x">Prof. x (mm):</label><input type="text" id="probe-t-x"></div>
+                    <div><label id="lbl-probe-t-res">Tiempo req:</label><input type="text" id="probe-t-res" readonly></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<div id="theory" class="section">
+    <div class="sub-nav">
+        <span id="tab-t" class="active-sub" onclick="showSubTheory('t')">Teoría</span>
+        <span id="tab-a" onclick="showSubTheory('a')">Aplicaciones</span>
+        <span id="tab-m" onclick="showSubTheory('m')">Manual de Uso</span>
+    </div>
+
+    <div id="content-t">
+        <div id="theory-general" class="theory-content">
+            <h2 style="text-align: center; color: #2c3e50; margin-bottom: 30px; font-weight: 800; letter-spacing: 1px;">
+                DIFUSIÓN EN ESTADO NO ESTACIONARIO
+            </h2>
+
+            <div style="background: #f8f9fa; border-radius: 15px; padding: 25px; margin-bottom: 35px; border-left: 8px solid #3498db;">
+                <p style="font-size: 1.1em; line-height: 1.6; color: #34495e; margin: 0;">
+                    En el mundo de la metalurgia, la <strong>Segunda Ley de Fick</strong> es la herramienta que nos permite "leer el futuro". Nos indica cómo los átomos de un elemento (como el Carbono) viajan al interior de un metal sólido y cómo su concentración cambia a medida que pasan las horas. 
+                    <br><br>
+                    A diferencia de la difusión simple, aquí <strong>el tiempo es la clave</strong>: nada es estático.
+                </p>
+            </div>
+
+            <h3 style="color: #2980b9; font-size: 1.4em; margin-bottom: 15px;">1. La Ecuación Matemática del Cambio</h3>
+            <p style="color: #555;">Esta es la ecuación diferencial parcial que gobierna el proceso. No es solo un dibujo; cada parte representa un fenómeno físico:</p>
+            
+            <div style="text-align: center; margin: 30px 0; padding: 30px; background: #ffffff; border: 1px solid #e1e8ed; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                <div style="font-size: 1.8em; color: #2c3e50; margin-bottom: 20px;">
+                    $$\frac{\partial C}{\partial t} = D \frac{\partial^2 C}{\partial x^2}$$
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; text-align: left; margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
+                    <div>
+                        <span style="color: #e74c3c; font-weight: bold; font-size: 1.2em;">\(\frac{\partial C}{\partial t}\)</span>
+                        <p style="font-size: 0.9em; color: #666; margin: 5px 0;"><strong>Velocidad de cambio:</strong> Qué tan rápido se está acumulando el carbono en un punto específico a medida que el reloj avanza.</p>
+                    </div>
+                    <div>
+                        <span style="color: #27ae60; font-weight: bold; font-size: 1.2em;">\(D\)</span>
+                        <p style="font-size: 0.9em; color: #666; margin: 5px 0;"><strong>Coeficiente de Difusión:</strong> La "facilidad" con la que los átomos pueden saltar entre los espacios del metal. Depende de la temperatura.</p>
+                    </div>
+                    <div>
+                        <span style="color: #3498db; font-weight: bold; font-size: 1.2em;">\(\frac{\partial^2 C}{\partial x^2}\)</span>
+                        <p style="font-size: 0.9em; color: #666; margin: 5px 0;"><strong>Gradiente de concentración:</strong> La diferencia de "presión" química que empuja a los átomos de donde hay muchos a donde hay pocos.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: #e8f4fd; padding: 20px; border-radius: 10px; margin-top: 20px;">
+                <h4 style="margin-top: 0; color: #2980b9;"> Analogía para entenderlo:</h4>
+                <p style="margin: 0; color: #34495e; font-size: 0.95em;">
+                    Imagina una habitación llena de gente (concentración alta) y un pasillo vacío (concentración baja). Si abres la puerta, la gente empezará a fluir al pasillo. 
+                    <strong>La Ley de Fick</strong> nos dice cuánta gente habrá en la mitad del pasillo después de 10 minutos.
+                </p>
+            </div>
+        </div>
+
+        <h3 style="border-left: 5px solid #3498db; padding-left: 15px; color: #2980b9;">1. Comportamiento del Perfil de Concentración</h3>
+        <div style="text-align: center; margin: 25px 0;">
+            <img src="https://www.lifeder.com/wp-content/uploads/2020/12/Representacion-2da-ley-de-Fick-618x420.jpg" alt="Perfil de Concentración" style="max-width: 70%; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+            <p style="font-size: 0.85em; color: #7f8c8d; margin-top: 8px;">Figura 1. Grafica de la variacion de concentracion de soluto respecto a la distancia para diferentes tiempos de proceso.</p>
+        </div>
+        <p>Como se aprecia en la <strong>Figura 1</strong>, la curva siempre nace en la concentración superficial (Cs). A medida que el tiempo transcurre, el gradiente se suaviza y la profundidad de penetración aumenta. La forma de esta curva se describe matemáticamente mediante la <em>función error gaussiana</em>.</p>
+
+        <h3 style="border-left: 5px solid #3498db; padding-left: 15px; color: #2980b9; margin-top: 40px;">
+            2. La Ecuación de Diseño Metalúrgico (Solución de Fick)
+        </h3>
+
+        <p style="color: #444; line-height: 1.6;">
+            Cuando trabajamos con piezas industriales (como un engranaje en un horno de cementación), asumimos que la superficie está en contacto con un medio constante. Para este escenario, la <strong>Segunda Ley de Fick</strong> se resuelve mediante una función matemática específica que nos permite predecir la profundidad de la capa endurecida:
+        </p>
+
+        <div style="text-align: center; margin: 30px 0; padding: 40px; background: #f4f8fb; border-radius: 15px; border: 1px solid #d1e3f3; box-shadow: inset 0 2px 10px rgba(0,0,0,0.02);">
+            <div style="font-size: 1.6em; color: #2c3e50; margin-bottom: 25px;">
+                $$\frac{C_x - C_0}{C_s - C_0} = erf\left( \frac{x}{2\sqrt{Dt}} \right)$$
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; text-align: left; border-top: 2px solid #ffffff; padding-top: 25px;">
+                <div style="background: white; padding: 15px; border-radius: 10px; border: 1px solid #e1e8ed;">
+                    <strong style="color: #3498db;">El Lado Izquierdo (La Relación):</strong>
+                    <p style="font-size: 0.9em; color: #666; margin: 5px 0;">
+                        Mide qué tan cerca está el interior de la pieza (\(C_x\)) de saturarse completamente con el carbono del horno (\(C_s\)). Es un valor que va de 0 a 1.
+                    </p>
+                </div>
+                <div style="background: white; padding: 15px; border-radius: 10px; border: 1px solid #e1e8ed;">
+                    <strong style="color: #3498db;">El Lado Derecho (La Resistencia):</strong>
+                    <p style="font-size: 0.9em; color: #666; margin: 5px 0;">
+                        La función <strong>erf</strong> (función error) modela la dificultad física que tienen los átomos para penetrar la red cristalina del metal a una profundidad \(x\).
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div style="background: #ffffff; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
+            <h4 style="margin-top: 0; color: #2c3e50; font-size: 1.1em;">Variables de diseño:</h4>
+            <ul style="list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+                <li style="padding: 8px; border-bottom: 1px solid #f9f9f9;"> <strong>\(x\):</strong> Profundidad desde la superficie (mm o m).</li>
+                <li style="padding: 8px; border-bottom: 1px solid #f9f9f9;"> <strong>\(t\):</strong> Tiempo de exposición en el horno (s o h).</li>
+                <li style="padding: 8px; border-bottom: 1px solid #f9f9f9;"> <strong>\(D\):</strong> Coeficiente de difusividad del material.</li>
+                <li style="padding: 8px; border-bottom: 1px solid #f9f9f9;"> <strong>\(C_s\):</strong> Potencial de carbono en la atmósfera.</li>
+            </ul>
+        </div>
+
+        <div style="margin-top: 25px; padding: 15px; background: #fff3cd; border-radius: 8px; border-left: 5px solid #ffc107;">
+            <p style="margin: 0; font-size: 0.95em; color: #856404;">
+                <strong>Nota de Ingeniería:</strong> Esta ecuación asume que la pieza es lo suficientemente gruesa como para que el carbono nunca llegue al "otro lado" (modelo de sólido semi-infinito), lo cual es ideal para la mayoría de piezas mecánicas.
+            </p>
+        </div>
+
+        <h3 style="border-left: 5px solid #3498db; padding-left: 15px; color: #2980b9; margin-top: 40px; font-weight: 700;">
+            3. El "Traductor" entre la Teoría y la Práctica: Función Error (\(erf\))
+        </h3>
+
+        <div style="background: #ffffff; border: 1px solid #e1e8ed; padding: 30px; border-radius: 20px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
+            
+            <div style="margin-bottom: 25px;">
+                <p style="color: #444; line-height: 1.7; font-size: 1.05em;">
+                    La <strong>Función Error Gaussiana</strong> es el corazón del diseño metalúrgico. Como es una integral que no se puede resolver con una suma simple, los ingenieros usamos la <strong>Figura 2</strong> como un "mapa de navegación". 
+                    <br><br>
+                    Esta tabla nos dice: <em>"Si quieres alcanzar este nivel de carbono (\(erf\)), debes penetrar hasta esta profundidad relativa (\(z\))"</em>.
+                </p>
+            </div>
+
+            <div style="display: flex; flex-wrap: wrap; gap: 30px; align-items: flex-start;">
+                
+                <div style="flex: 1; min-width: 320px; text-align: center;">
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 15px; border: 2px dashed #cbd5e0;">
+                        <img src="https://image3.slideserve.com/5858618/valores-de-la-funci-n-de-error-l.jpg" alt="Tabla Función Error" style="max-width: 100%; border-radius: 10px; filter: contrast(1.1);">
+                        <p style="font-size: 0.85em; color: #718096; margin-top: 12px; font-weight: 500;">
+                            Figura 2. Diccionario de equivalencias entre el argumento \(z\) y la probabilidad de difusión \(erf(z)\).
+                        </p>
+                    </div>
+                </div>
+
+                <div style="flex: 1; min-width: 320px;">
+                    <div style="background: #eef2ff; padding: 25px; border-radius: 15px; border-left: 6px solid #4f46e5;">
+                        <h4 style="margin-top: 0; color: #3730a3; display: flex; align-items: center; gap: 10px;">
+                             Guía de Lectura Rápida
+                        </h4>
+                        <ul style="padding-left: 0; list-style: none; color: #312e81;">
+                            <li style="margin-bottom: 15px; display: flex; gap: 10px;">
+                                <span style="background: #4f46e5; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.8em;">1</span>
+                                <span><strong>Entrada por Resultado:</strong> Si ya calculaste \(\frac{C_x - C_0}{C_s - C_0}\), busca ese número en las columnas de <strong>\(erf(z)\)</strong>.</span>
+                            </li>
+                            <li style="margin-bottom: 15px; display: flex; gap: 10px;">
+                                <span style="background: #4f46e5; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.8em;">2</span>
+                                <span><strong>Salida por Posición:</strong> Una vez ubicado el valor, el número a su izquierda es tu <strong>\(z\)</strong>. Este valor es el que usarás para despejar el tiempo o la profundidad.</span>
+                            </li>
+                            <li style="display: flex; gap: 10px;">
+                                <span style="background: #4f46e5; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.8em;">3</span>
+                                <span><strong>Aproximación Lineal:</strong> Si tu valor está en medio de dos filas (ej. 0.45), toma el promedio de los valores de \(z\). ¡Así de simple!</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+            <div style="background: #f0fff4; border: 1px solid #c6f6d5; padding: 20px; border-radius: 12px;">
+                <h5 style="margin: 0 0 10px 0; color: #22543d; font-size: 1em;"> Por qué usar la Tabla</h5>
+                <p style="margin: 0; font-size: 0.9em; color: #276749;">
+                    Evita errores de redondeo y permite que cualquier persona, sin software avanzado, pueda diseñar un tratamiento térmico con precisión de laboratorio.
+                </p>
+            </div>
+            <div style="background: #fff5f5; border: 1px solid #fed7d7; padding: 20px; border-radius: 12px;">
+                <h5 style="margin: 0 0 10px 0; color: #742a2a; font-size: 1em;"> El error más común</h5>
+                <p style="margin: 0; font-size: 0.9em; color: #9b2c2c;">
+                    No intentes multiplicar \(erf \times z\). Son una sola entidad. <strong>\(erf(z)\)</strong> es como decir \(\sin(45^\circ)\); no puedes separar la función del ángulo.
+                </p>
+            </div>
+        </div>
+
+        <div style="background: #ffffff; border: 2px solid #27ae60; padding: 40px; border-radius: 25px; margin: 40px 0; box-shadow: 0 20px 40px rgba(0,0,0,0.1); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+            
+            <div style="text-align: center; margin-bottom: 40px;">
+                <h2 style="color: #1e4620; margin: 0; font-size: 2.2em; font-weight: 800;"> GUÍA MAESTRA: Resolución Completa</h2>
+                <p style="color: #666; font-size: 1.1em; margin-top: 10px;">De la teoría al acero: resolvamos un caso real de ingeniería.</p>
+            </div>
+
+            <div style="font-family: Arial, sans-serif; max-width: 900px; margin: auto; line-height: 1.6;">
+
+            <div style="background: #ffffff; border: 1px solid #e0e0e0; padding: 30px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 30px;">
+                <h4 style="color: #27ae60; text-align: center; margin-top: 0; text-transform: uppercase;">
+                     GUÍA MAESTRA: Resolución de Ejercicios
+                </h4>
+                
+                <div style="margin-top: 20px;">
+                    <div style="background: #f9fdfb; border-left: 5px solid #27ae60; padding: 12px; border-radius: 4px; margin-bottom: 10px;">
+                        <strong>1. Recolección:</strong> Identifica Cs (superficie), C0 (inicial) y Cx (objetivo).
+                    </div>
+
+                    <div style="background: #f4f9ff; border-left: 5px solid #3498db; padding: 12px; border-radius: 4px; margin-bottom: 10px;">
+                        <strong>2. Relación:</strong> Calcula el valor de: (Cx - C0) / (Cs - C0). 
+                        <br><small><i>Ejemplo: Si el resultado es 0.4, este es tu número base.</i></small>
+                    </div>
+
+                    <div style="background: #fffaf4; border-left: 5px solid #f39c12; padding: 12px; border-radius: 4px; margin-bottom: 10px;">
+                        <strong>3. Despeje erf(z):</strong> Réstale a 1 el valor anterior: 1 - 0.4 = <b>0.6</b>.
+                    </div>
+
+                    <div style="background: #fcfcfc; border-left: 5px solid #95a5a6; padding: 12px; border-radius: 4px; margin-bottom: 10px;">
+                        <strong>4. Tabla:</strong> Busca ese 0.6 en la columna derecha de la Tabla (erf) para hallar el valor de <b>z</b>.
+                    </div>
+
+                    <div style="background: #fdfeff; border-left: 5px solid #9b59b6; padding: 12px; border-radius: 4px;">
+                        <strong>5. Final:</strong> Usa la fórmula <b>z = x / (2 * √(D * t))</b> para despejar tiempo o profundidad.
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: #e8f5e9; border-left: 8px solid #27ae60; padding: 25px; border-radius: 0 12px 12px 0;">
+                <h4 style="margin: 0 0 10px 0; color: #1b5e20;"> CASO DE ESTUDIO: Cementación de un Engranaje</h4>
+                
+                <p style="margin: 0; color: #2e7d32;">
+                    Un acero con <b>0.2% de C (C0)</b> debe alcanzar <b>0.45% de C (Cx)</b> a una profundidad de <b>0.5 mm</b>. 
+                    El horno tiene una atmósfera de <b>1.2% de C (Cs)</b>.
+                </p>
+                
+                <div style="margin-top: 15px; background: rgba(255,255,255,0.6); padding: 12px; border-radius: 8px; border: 1px dashed #27ae60; color: #1b5e20;">
+                    <strong>Pregunta:</strong> ¿Cuántas horas requiere el proceso si D = 1.28 x 10<sup>-11</sup> m<sup>2</sup>/s?
+                </div>
+            </div>
+
+        </div>
+
+            <div style="display: grid; grid-template-columns: 1fr; gap: 30px; margin-top: 30px;">
+                
+                <div style="display: flex; gap: 20px; align-items: flex-start;">
+                    <div style="background: #27ae60; color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: bold; font-size: 1.2em;">1</div>
+                    <div style="flex-grow: 1;">
+                        <h4 style="margin: 0 0 10px 0; color: #2c3e50;">Paso 1: Preparar los "Ingredientes" (Datos)</h4>
+                        <p style="margin: 0; color: #555;">Antes de calcular, asegúrate de que todo esté en las mismas unidades (Metros y Segundos).</p>
+                        <div style="display: flex; gap: 15px; margin-top: 10px; flex-wrap: wrap;">
+                            <code style="background: #eee; padding: 5px 10px; border-radius: 5px;">Cs = 1.2</code>
+                            <code style="background: #eee; padding: 5px 10px; border-radius: 5px;">C0 = 0.2</code>
+                            <code style="background: #eee; padding: 5px 10px; border-radius: 5px;">Cx = 0.45</code>
+                            <code style="background: #ffecb3; padding: 5px 10px; border-radius: 5px; border: 1px solid #ffcc33;">x = 0.0005 m (¡Ojo con los mm!)</code>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 20px; align-items: flex-start;">
+                    <div style="background: #3498db; color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: bold; font-size: 1.2em;">2</div>
+                    <div style="flex-grow: 1;">
+                        <h4 style="margin: 0 0 10px 0; color: #2c3e50;">Paso 2: Calcular la Relación de Concentración</h4>
+                        <p style="margin: 0; color: #555;">Esto nos dice qué porcentaje del proceso de saturación hemos completado.</p>
+                        <div style="background: #f1f8ff; padding: 20px; border-radius: 12px; margin-top: 15px; text-align: center; border: 1px solid #d0e1fd;">
+                            <span style="font-size: 1.4em; color: #0d47a1;">$$ \frac{0.45 - 0.2}{1.2 - 0.2} = \frac{0.25}{1.0} = \mathbf{0.25} $$</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 20px; align-items: flex-start;">
+                    <div style="background: #f39c12; color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: bold; font-size: 1.2em;">3</div>
+                    <div style="flex-grow: 1;">
+                        <h4 style="margin: 0 0 10px 0; color: #2c3e50;">Paso 3: El Salto a la Tabla (La Función Error)</h4>
+                        <p style="margin: 0; color: #555;">La fórmula dice: $Relación = 1 - erf(z)$. Por lo tanto:</p>
+                        <div style="background: #fff3e0; padding: 20px; border-radius: 12px; margin-top: 15px; text-align: center; border: 1px solid #ffe0b2;">
+                            <span style="font-size: 1.4em; color: #e65100;">$$ erf(z) = 1 - 0.25 = \mathbf{0.75} $$</span>
+                        </div>
+                        <p style="margin-top: 15px; color: #666; font-style: italic; font-size: 0.9em;">
+                             <strong>Buscando en la Figura 2:</strong> Buscas 0.75 en la columna de la derecha. Verás que el valor más cercano nos da un <strong style="color: #e65100;">z ≈ 0.81</strong>.
+                        </p>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 20px; align-items: flex-start;">
+                    <div style="background: #9b59b6; color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: bold; font-size: 1.2em;">4</div>
+                    <div style="flex-grow: 1;">
+                        <h4 style="margin: 0 0 10px 0; color: #2c3e50;">Paso 4: Despeje Final (Tiempo)</h4>
+                        <p style="margin: 0; color: #555;">Igualamos nuestra z de la tabla con la fórmula de diseño:</p>
+                        <div style="background: #f3e5f5; padding: 20px; border-radius: 12px; margin-top: 15px; text-align: center; border: 1px solid #e1bee7;">
+                            <span style="font-size: 1.4em; color: #4a148c;">$$ 0.81 = \frac{0.0005}{2\sqrt{(1.28 \times 10^{-11}) \cdot t}} $$</span>
+                        </div>
+                        <p style="margin-top: 15px; color: #555;">Elevando al cuadrado y despejando t, obtenemos:</p>
+                        <div style="background: #27ae60; color: white; padding: 15px; border-radius: 10px; text-align: center; font-weight: bold; font-size: 1.2em; margin-top: 10px;">
+                            t = 7,433 segundos ≈ 2.06 Horas
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div style="margin-top: 40px; padding: 20px; background: #f8f9fa; border-radius: 15px; border: 1px dashed #ccc; text-align: center;">
+                <p style="margin: 0; color: #7f8c8d; font-size: 0.95em;">
+                    <strong>¡Felicidades!</strong> Has diseñado un tratamiento térmico. Si dejas la pieza 2 horas y 4 minutos en el horno, habrás cumplido con la especificación técnica de dureza a 0.5 mm.
+                </p>
+            </div>
+        </div>
+
+        <div style="font-family: 'Segoe UI', Arial, sans-serif; color: #2c3e50; max-width: 950px; margin: auto; line-height: 1.6;">
+
+            <div style="text-align: center; margin-bottom: 40px;">
+                <h2 style="color: #c0392b; margin: 0; font-size: 2.2em; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">
+                    3. El Pilar Científico: Diagrama Hierro-Cementita (Fe-Fe<sub>3</sub>C)
+                </h2>
+                <p style="color: #7f8c8d; font-size: 1.2em; margin-top: 10px;">
+                    Sin este mapa, la difusión de carbono en el acero sería un proceso a ciegas.
+                </p>
+            </div>
+
+            <div style="text-align: center; margin-bottom: 45px; background: #ffffff; padding: 20px; border-radius: 20px; border: 1px solid #e1e8ed; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+                <img src="https://blog.utp.edu.co/metalografia/files/2013/05/Diagrama-Fe-C.jpg" 
+                     alt="Diagrama Hierro Carbono UTP" 
+                     style="max-width: 100%; height: auto; border-radius: 10px; border: 1px solid #eee;">
+                <p style="font-size: 0.9em; color: #7f8c8d; margin-top: 15px; font-style: italic;">
+                    Figura 3. Diagrama de fases Fe-C. Fuente: Blog de Metalografía UTP.
+                </p>
+            </div>
+
+            <div style="background: #fdf2f2; border-left: 8px solid #c0392b; padding: 30px; border-radius: 15px; margin-bottom: 40px;">
+                <h4 style="color: #c0392b; margin-top: 0; font-size: 1.3em;">¿Por qué es vital para la Difusión?</h4>
+                <p style="font-size: 1.1em; color: #34495e;">
+                    El diagrama Fe-C nos dicta las <b>reglas del juego</b>. En un proceso de cementación, nos movemos principalmente en la región de la <b>Austenita (Fase γ)</b>. Es aquí donde el hierro permite que los átomos de carbono se "hospeden" en sus espacios intersticiales y viajen hacia el núcleo de la pieza.
+                </p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px;">
+                
+                <div style="background: white; border: 1px solid #e1e8ed; padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+                    <div style="font-size: 2em; margin-bottom: 10px;"></div>
+                    <h4 style="margin: 0 0 10px 0; color: #c0392b;">Régimen de Temperatura</h4>
+                    <p style="margin: 0; font-size: 0.95em; color: #555;">
+                        Nos ayuda a identificar la <b>Temperatura A3</b>. Debemos trabajar por encima de esta línea para asegurar que la estructura sea completamente austenítica, optimizando la velocidad de difusión.
+                    </p>
+                </div>
+
+                <div style="background: white; border: 1px solid #e1e8ed; padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+                    <div style="font-size: 2em; margin-bottom: 10px;"></div>
+                    <h4 style="margin: 0 0 10px 0; color: #c0392b;">Potencial de Carbono (Cs)</h4>
+                    <p style="margin: 0; font-size: 0.95em; color: #555;">
+                        El diagrama define el límite de saturación. A 1130°C, la austenita admite un máximo de ~1,76% de Carbono según el diagrama de ejemplo. Si el horno supera este límite, se formará <b>Cementita Proeutectoide</b>, fragilizando la superficie.
+                    </p>
+                </div>
+
+                <div style="background: white; border: 1px solid #e1e8ed; padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+                    <div style="font-size: 2em; margin-bottom: 10px;"></div>
+                    <h4 style="margin: 0 0 10px 0; color: #c0392b;">Estructura Final</h4>
+                    <p style="margin: 0; font-size: 0.95em; color: #555;">
+                        Dependiendo de dónde terminemos en el diagrama tras la difusión, sabremos qué microestructura resultará al enfriar muy lentamente (Perlita) y este es el inicio para saber que sucederá al enfríarlo a diferentes Velocidades de enfriamiento (diagramas TTT y CCT). Con los cuales tendremos una idea de la dureza final.
+                    </p>
+                </div>
+
+            </div>
+
+            <div style="margin-top: 40px; background: #2c3e50; color: white; padding: 30px; border-radius: 20px; text-align: center;">
+                <p style="margin: 0; font-size: 1.1em; line-height: 1.6;">
+                    <b>Conclusión:</b> El éxito de la cementación depende de cruzar la información del diagrama (límites de fase) con las Leyes de Fick (tiempo y profundidad). El diagrama nos dice <b>"si es posible"</b> y Fick nos dice <b>"cuánto tarda"</b>.
+                </p>
+            </div>
+
+        </div>
+    </div> <div id="content-a" style="display: none;">
+        <h2 style="text-align: center; color: #2c3e50; margin-bottom: 30px; margin-top: 20px;">APLICACIONES EN LA INGENIERÍA DE MATERIALES</h2>
+        
+        <div id="seccion-cementacion-detallada" style="font-family: 'Segoe UI', Arial, sans-serif; color: #2c3e50; max-width: 1000px; margin: 40px auto; line-height: 1.7;">
+
+            <div style="background: linear-gradient(135deg, #2c3e50 0%, #c0392b 100%); padding: 60px 20px; border-radius: 30px; text-align: center; color: white; margin-bottom: 50px; box-shadow: 0 15px 35px rgba(0,0,0,0.2);">
+                <h1 style="margin: 0; font-size: 2.8em; font-weight: 800; text-transform: uppercase; letter-spacing: 2px;">La Cementación</h1>
+                <p style="font-size: 1.3em; opacity: 0.9; margin-top: 15px; font-weight: 300;">El arte y la ciencia de endurecer el acero a través del tiempo.</p>
+            </div>
+
+            <div style="margin-bottom: 60px;">
+                <h2 style="color: #c0392b; border-bottom: 3px solid #eee; padding-bottom: 10px; display: flex; align-items: center;">
+                    <span style="font-size: 1.5em; margin-right: 15px;"></span> Origen: El Secreto de los Antiguos Herreros
+                </h2>
+                <p>
+                    Mucho antes de conocer las <b>Leyes de Fick</b> o el <b>Diagrama Fe-C</b>, los herreros de la antigüedad (como los creadores del acero de Damasco) ya practicaban la cementación de forma empírica. 
+                </p>
+                <div style="background: #fdf2f2; padding: 25px; border-radius: 15px; margin: 20px 0; border-left: 8px solid #c0392b;">
+                    <strong>¿Cómo se originó?</strong> Se descubrió que las herramientas de hierro calentadas en fogatas de carbón vegetal durante largas horas se volvían significativamente más duras. Sin saberlo, estaban provocando una <b>difusión intersticial</b>: los átomos de carbono del carbón vegetal migraban hacia el hierro sólido a altas temperaturas.
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 30px; margin-bottom: 60px;">
+                
+                <div style="background: white; border: 1px solid #e1e8ed; padding: 30px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
+                    <h3 style="color: #7f8c8d; margin-top: 0;"> El Método Tradicional (En Caja)</h3>
+                    <p style="font-size: 0.95em;">
+                        Se empaquetaban las piezas en cajas metálicas llenas de carbón vegetal y activadores químicos (carbonato de bario). Se sellaban y se metían al horno por días. 
+                    </p>
+                    <ul style="font-size: 0.9em; color: #555;">
+                        <li><b>Problema:</b> Poco control sobre la profundidad de capa.</li>
+                        <li><b>Limitación:</b> Proceso extremadamente lento y sucio.</li>
+                    </ul>
+                </div>
+
+                <div style="background: #f4f9ff; border: 1px solid #d1e3ff; padding: 30px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
+                    <h3 style="color: #2980b9; margin-top: 0;"> Tecnología Actual (Gaseosa y Vacío)</h3>
+                    <p style="font-size: 0.95em;">
+                        Hoy usamos atmósferas controladas de hidrocarburos (metano, propano) o <b>cementación por plasma</b>.
+                    </p>
+                    <ul style="font-size: 0.9em; color: #555;">
+                        <li><b>Ventaja:</b> Control total del "Potencial de Carbono" mediante sensores de oxígeno.</li>
+                        <li><b>Precisión:</b> Podemos predecir con error de micras la profundidad de la capa (Cs).</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="background: #2c3e50; color: white; padding: 40px; border-radius: 25px; margin-bottom: 60px; position: relative; overflow: hidden;">
+                <div style="position: absolute; right: -30px; bottom: -30px; opacity: 0.1; font-size: 10em; transform: rotate(-15deg);"></div>
+                <h2 style="margin-top: 0; color: #3498db;">¿Para qué sirve realmente?</h2>
+                <p style="font-size: 1.1em; line-height: 1.8;">
+                    En ingeniería, a menudo necesitamos materiales contradictorios: queremos que la superficie sea <b>extremadamente dura</b> para resistir el desgaste, pero que el núcleo sea <b>tenaz y flexible</b> para no quebrarse bajo impactos o vibraciones. 
+                </p>
+                <div style="display: flex; gap: 20px; margin-top: 25px; flex-wrap: wrap;">
+                    <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; flex: 1; min-width: 200px; border: 1px solid rgba(255,255,255,0.2);">
+                        <strong style="color: #3498db;">Superficie:</strong> <br>Alta concentración de Fe<sub>3</sub>C. Resiste fricción y contacto metal-metal.
+                    </div>
+                    <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; flex: 1; min-width: 200px; border: 1px solid rgba(255,255,255,0.2);">
+                        <strong style="color: #3498db;">Núcleo:</strong> <br>Bajo carbono. Absorbe energía y evita la propagación de grietas.
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 40px;">
+                <h2 style="color: #2c3e50; border-bottom: 3px solid #eee; padding-bottom: 10px;"> Aplicaciones en la Industria Moderna</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 3em;"></div>
+                        <h4 style="margin: 10px 0 5px 0;">Automotriz</h4>
+                        <p style="font-size: 0.85em; color: #666;">Engranajes de caja de cambios y árboles de levas.</p>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 3em;"></div>
+                        <h4 style="margin: 10px 0 5px 0;">Aeroespacial</h4>
+                        <p style="font-size: 0.85em; color: #666;">Componentes de turbinas y sistemas de aterrizaje.</p>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 3em;"></div>
+                        <h4 style="margin: 10px 0 5px 0;">Maquinaria Pesada</h4>
+                        <p style="font-size: 0.85em; color: #666;">Pernos de alta resistencia y coronas dentadas.</p>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 3em;"></div>
+                        <h4 style="margin: 10px 0 5px 0;">Energía</h4>
+                        <p style="font-size: 0.85em; color: #666;">Ejes de aerogeneradores sometidos a fatiga extrema.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="seccion-cementacion-ultra" style="font-family: 'Segoe UI', Arial, sans-serif; color: #2c3e50; line-height: 1.7;">
+
+            <div style="margin-bottom: 50px;">
+                <h2 style="color: #c0392b; border-bottom: 3px solid #eee; padding-bottom: 10px; display: flex; align-items: center;">
+                    <span style="font-size: 1.5em; margin-right: 15px;"></span> Evolución Histórica de la Cementación
+                </h2>
+                <p>
+                    La cementación es uno de los procesos metalúrgicos más antiguos. Desde los artesanos que forjaban espadas en el medioevo hasta la ingeniería aeroespacial moderna, el principio sigue siendo el mismo: <b>difundir carbono en estado sólido</b>. 
+                </p>
+                <div style="background: #fdf2f2; padding: 25px; border-radius: 15px; border-left: 8px solid #c0392b; margin: 20px 0;">
+                    <strong>El origen empírico:</strong> Antiguamente, las piezas se rodeaban de materiales orgánicos (huesos, cueros o carbón vegetal) y se mantenían al rojo vivo. Sin saberlo, los herreros usaban la <b>Segunda Ley de Fick</b> para crear capas superficiales de <b>Cementita (Fe<sub>3</sub>C)</b>, permitiendo que armas de hierro dulce cortaran como el acero.
+                </div>
+            </div>
+
+            <div style="background: #ffffff; border: 1px solid #e1e8ed; padding: 35px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-bottom: 40px;">
+                <div style="display: flex; flex-wrap: wrap; gap: 30px; align-items: center;">
+                    <div style="flex: 1; min-width: 300px;">
+                        <h3 style="color: #c0392b; margin-top: 0;"> Cementación en Atmósfera Controlada</h3>
+                        <p>
+                            A diferencia del método antiguo, hoy controlamos el <b>Potencial de Carbono (Cp)</b> mediante gases hidrocarburos. Este proceso se realiza típicamente entre <b>900°C y 950°C</b>, donde el acero es completamente <b>Austenítico (Fase γ)</b>.
+                        </p>
+                        <ul style="padding-left: 20px; color: #555;">
+                            <li><b>Precisión:</b> Uso de sondas de oxígeno para regular la entrada de carbono.</li>
+                            <li><b>Control:</b> Permite definir el espesor exacto de la capa endurecida (Eht).</li>
+                            <li><b>Aplicación:</b> Fundamental para componentes que sufren fatiga y desgaste severo.</li>
+                        </ul>
+                    </div>
+                    <div style="flex: 1; min-width: 300px; text-align: center;">
+                        <img src="https://img.interempresas.net/FotosArtProductos/P189829.jpg" alt="Horno de atmósfera controlada" style="max-width: 100%; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                        <p style="font-size: 0.85em; color: #7f8c8d; margin-top: 10px; font-style: italic;">Figura 4. Horno industrial con control preciso de atmósfera de cementación.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: #f4f9ff; border: 1px solid #d1e3ff; padding: 35px; border-radius: 20px; margin-bottom: 40px;">
+                <h3 style="color: #2980b9; margin-top: 0; display: flex; align-items: center;">
+                    <span style="margin-right: 12px;"></span> Análisis del Gradiente Microestructural
+                </h3>
+                <p>
+                    Tras la difusión, el éxito del proceso se valida bajo el microscopio. Se observa una transición clara de fases debido al cambio en la concentración de carbono:
+                </p>
+                <div style="text-align: center; margin: 25px 0;">
+                    <img src="https://1.bp.blogspot.com/-Hi5J9LcClSk/XSFftL_wtqI/AAAAAAAABo0/SQmcCbnNKuwNTSkpJJg1P3gOA0-mwatjgCLcBGAs/s1600/Carburacion.png" alt="Micrografía de gradiente de carbono" style="max-width: 85%; border-radius: 12px; border: 2px solid #fff; box-shadow: 0 0 20px rgba(0,0,0,0.1);">
+                    <p style="font-size: 0.85em; color: #7f8c8d; margin-top: 10px; font-style: italic;">Figura 5. Corte transversal: La zona oscura muestra la alta densidad de perlita en la superficie cementada.</p>
+                </div>
+                <p style="font-size: 0.95em; color: #34495e; text-align: center;">
+                    <b>Zona Superficial (Parte de la izquierda):</b> Tendrá una alta dureza post-temple, posterior a la cementación se una microestructura tipica de un acero hipereutectoide. 
+            <b>Zona de Núcleo (Derecha de la micrografía):</b> Alta tenacidad (Ferrita/Perlita), con mayor presencia de ferrita tipico de un acero hipoeutectoide.
+            <b>Zona de Transición (centro de la micrografía):</b> Hay una región de transición de la parte hipereutectoide (superficie de la pieza) a la zona hipoeutectoide (núcleo de la pieza) donde en esta región habrá parte de microestructural tipica de un acero eutectoide. 
+                </p>
+            </div>
+
+            <div style="background: #2c3e50; color: white; padding: 40px; border-radius: 25px; text-align: center;">
+                <h3 style="margin-top: 0; color: #3498db;">¿Para qué sirve en la industria moderna?</h3>
+                <p style="font-size: 1.1em; opacity: 0.9; max-width: 850px; margin: 0 auto; line-height: 1.8;">
+                    La cementación permite que una pieza barata (acero de bajo carbono) compita con aleaciones costosas. Se aplica en <b>engranajes de transmisión, árboles de levas y rodamientos</b>, donde el núcleo debe absorber energía (impactos) y la superficie debe resistir el desgaste (fricción). Sin los cálculos de difusión, estos componentes fallarían por fragilidad o desgaste prematuro.
+                </p>
+            </div>
+
+        </div>
+
+        <div id="seccion-nitruracion-robusta" style="font-family: 'Segoe UI', Arial, sans-serif; color: #2c3e50; line-height: 1.8; max-width: 1000px; margin: 40px auto;">
+
+            <div style="background: linear-gradient(135deg, #243b55 0%, #2980b9 100%); padding: 50px 20px; border-radius: 30px; text-align: center; color: white; margin-bottom: 50px; box-shadow: 0 15px 35px rgba(0,0,0,0.15);">
+                <h1 style="margin: 0; font-size: 2.5em; font-weight: 800; text-transform: uppercase; letter-spacing: 2px;">La Nitruración</h1>
+                <p style="font-size: 1.2em; opacity: 0.9; margin-top: 15px; font-weight: 300;">Difusión de nitrógeno para una resistencia al desgaste insuperable.</p>
+            </div>
+
+            <div style="margin-bottom: 60px;">
+                <h2 style="color: #2980b9; border-bottom: 3px solid #eee; padding-bottom: 10px; display: flex; align-items: center;">
+                    <span style="font-size: 1.5em; margin-right: 15px;"></span> El Origen: La Revolución de Adolf Machlet
+                </h2>
+                <p>
+                    A diferencia de la cementación, que tiene milenios de antigüedad, la nitruración es un proceso del **siglo XX**. Fue desarrollada formalmente alrededor de 1906 por Adolf Machlet y perfeccionada por Adolph Fry en la década de 1920. 
+                </p>
+                <div style="background: #f4f9ff; padding: 25px; border-radius: 15px; margin: 20px 0; border-left: 8px solid #2980b9;">
+                    <strong>El descubrimiento clave:</strong> Fry descubrió que el hierro combinado con ciertos elementos de aleación (Aluminio, Cromo, Molibdeno) formaba nitruros extremadamente estables y duros cuando se exponía a amoníaco a temperaturas inferiores a las de transformación crítica. Esto permitió endurecer piezas sin necesidad de temple posterior, eliminando el riesgo de grietas y deformaciones térmicas.
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px; margin-bottom: 60px;">
+                <div style="background: white; border: 1px solid #e1e8ed; padding: 30px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
+                    <h3 style="color: #2c3e50; margin-top: 0;">Mecanismo de Difusión</h3>
+                    <p style="font-size: 0.95em;">
+                        El proceso se realiza usualmente entre 500°C y 575°C (fase ferrítica). Al usar amoníaco (NH<sub>3</sub>), este se disocia en la superficie del acero liberando nitrógeno atómico.
+                    </p>
+                    <ul style="font-size: 0.9em; color: #555;">
+                        <li><b>Capa Blanca:</b> Se forma una capa delgada de nitruros de hierro (fases ε y γ') muy dura pero frágil.</li>
+                        <li><b>Zona de Difusión:</b> El nitrógeno penetra más profundo, formando nitruros con los elementos de aleación del acero, creando una barrera contra la fatiga.</li>
+                    </ul>
+                </div>
+
+                <div style="text-align: center;">
+                    <img src="https://www.researchgate.net/profile/Carlos-Bohorquez-3/publication/280738129/figure/fig6/AS:391431429607425@1470335933086/Microestructura-de-la-capa-nitrocarburada-en-un-acero-AISI-SAE-1020-realizada-a-700C.png" alt="Micrografía de capa nitrurada" style="max-width: 100%; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #ddd;">
+                    <p style="font-size: 0.85em; color: #7f8c8d; margin-top: 10px; font-style: italic;">Figura 6. Micrografía típica: Se observa la "capa blanca" superficial y la zona de difusión interna.</p>
+                </div>
+            </div>
+
+            <div style="background: #ffffff; border: 1px solid #e1e8ed; padding: 40px; border-radius: 25px; margin-bottom: 60px;">
+                <h3 style="color: #2c3e50; margin-top: 0;"> Tecnologías Modernas</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px;">
+                    <div style="border-top: 4px solid #3498db; padding-top: 15px;">
+                        <h4 style="margin: 0; color: #3498db;">Nitruración Gaseosa</h4>
+                        <p style="font-size: 0.9em;">Uso de atmósferas de amoníaco en hornos de pozo. Es el método más versátil para grandes volúmenes de piezas.</p>
+                    </div>
+                    <div style="border-top: 4px solid #9b59b6; padding-top: 15px;">
+                        <h4 style="margin: 0; color: #9b59b6;">Nitruración por Plasma (Iónica)</h4>
+                        <p style="font-size: 0.9em;">Se utiliza una descarga luminiscente para ionizar el gas. Es ultra-precisa y amigable con el medio ambiente al no usar sales cianuradas.</p>
+                    </div>
+                    <div style="border-top: 4px solid #1abc9c; padding-top: 15px;">
+                        <h4 style="margin: 0; color: #1abc9c;">Tenifer (Sales)</h4>
+                        <p style="font-size: 0.9em;">Inmersión en baños de sales fundidas. Muy rápido para obtener capas delgadas y resistentes a la corrosión.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: #2c3e50; color: white; padding: 45px; border-radius: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
+                <h2 style="margin-top: 0; color: #3498db; text-align: center;">¿Por qué elegir Nitruración?</h2>
+                <p style="text-align: center; font-size: 1.1em; opacity: 0.9; margin-bottom: 35px;">
+                    A diferencia de la cementación, la nitruración no requiere enfriamiento brusco (temple), lo que la hace la opción número uno para piezas de precisión geométrica.
+                </p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 25px;">
+                    <div style="text-align: center; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 15px;">
+                        <div style="font-size: 2.5em;"></div>
+                        <h4 style="margin: 10px 0;">Dureza Extrema</h4>
+                        <p style="font-size: 0.85em; opacity: 0.8;">Supera los 1000 HV (Vickers) en aceros aleados.</p>
+                    </div>
+                    <div style="text-align: center; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 15px;">
+                        <div style="font-size: 2.5em;"></div>
+                        <h4 style="margin: 10px 0;">Estabilidad</h4>
+                        <p style="font-size: 0.85em; opacity: 0.8;">Mínima distorsión dimensional de la pieza.</p>
+                    </div>
+                    <div style="text-align: center; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 15px;">
+                        <div style="font-size: 2.5em;"></div>
+                        <h4 style="margin: 10px 0;">Corrosión</h4>
+                        <p style="font-size: 0.85em; opacity: 0.8;">Excelente resistencia a la oxidación y ambientes salinos.</p>
+                    </div>
+                </div>
+                <p style="margin-top: 40px; font-size: 0.9em; text-align: center; font-style: italic; opacity: 0.7;">
+                    Aplicaciones: Cigüeñales de alta competición, camisas de cilindro, moldes de inyección de plástico y herramientas de corte.
+                </p>
+            </div>
+
+        </div>
+    </div> <div id="content-m" style="display: none;">
+        <div style="background: white; padding: 40px; border-radius: 15px; border: 1px solid #2c3e50; margin-top: 20px; color: #333; box-shadow: 0 4px 15px rgba(0,0,0,0.05); max-width: 1000px; margin-left: auto; margin-right: auto;">
+            
+            <div style="text-align: center; border-bottom: 3px solid #3498db; padding-bottom: 20px; margin-bottom: 30px;">
+                <h2 style="color: #2c3e50; margin: 0; font-size: 2.2em; text-transform: uppercase; letter-spacing: 1px;"> Manual de Operación</h2>
+                <p style="color: #7f8c8d; font-size: 1.1em; margin-top: 10px;">Guía técnica completa para el uso del Simulador de Difusión y Análisis de Fick.</p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr; gap: 30px; font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.7;">
+
+                <div style="background: #f8f9fa; padding: 25px; border-radius: 10px; border-left: 6px solid #2c3e50;">
+                    <h3 style="color: #2c3e50; margin-top: 0;">1. Estructura de la Aplicación</h3>
+                    <p style="margin-bottom: 10px;">La plataforma cuenta con un menú de navegación superior que divide la herramienta en dos grandes módulos:</p>
+                    <ul style="padding-left: 20px; color: #444;">
+                        <li><b>Simulador:</b> Es el motor de cálculo. Aquí se ingresan los parámetros termodinámicos para resolver la Segunda Ley de Fick.</li>
+                        <li><b>Teoría y Aplicaciones:</b> Es el repositorio documental. Está subdividido en <b>Teoría</b> (para estudiar las ecuaciones y el diagrama Fe-C) y <b>Aplicaciones</b> (para comprender procesos industriales como la cementación y nitruración).</li>
+                    </ul>
+                </div>
+
+                <div style="border: 1px solid #e1e8ed; padding: 25px; border-radius: 10px;">
+                    <h3 style="color: #2980b9; margin-top: 0;">2. Panel de Entrada de Datos (Simulador)</h3>
+                    <p>El simulador está diseñado para resolver una ecuación con una incógnita. El flujo de trabajo es el siguiente:</p>
+                    
+                    <ol style="padding-left: 20px; color: #444;">
+                        <li style="margin-bottom: 10px;"><b>Selección de Variable Incógnita:</b> En el menú desplegable superior, seleccione qué valor desea que el simulador calcule. Al seleccionarlo, el campo de entrada correspondiente desaparecerá, dejándole solo las variables que debe llenar.</li>
+                        
+                        <li style="margin-bottom: 10px;"><b>Formato de Números (CRÍTICO):</b> El sistema procesa la información en formato hispano. <strong>Utilice siempre la coma (,) para indicar valores decimales</strong> (ej. <code>0,45</code>). El uso de puntos puede generar resultados erróneos o fallos en las gráficas.</li>
+                        
+                        <li style="margin-bottom: 10px;"><b>Llenado de Variables:</b>
+                            <ul style="list-style-type: square; margin-top: 5px;">
+                                <li><b>Cs (Concentración superficial):</b> % de átomos del elemento en la atmósfera del horno (ej. 1,2).</li>
+                                <li><b>C0 (Concentración inicial):</b> % base del elemento en la pieza antes del tratamiento.</li>
+                                <li><b>Cx (Concentración a distancia x):</b> % objetivo o actual a la profundidad evaluada.</li>
+                                <li><b>x (Distancia/Profundidad):</b> Asegúrese de seleccionar la unidad correcta (m, cm, mm, in).</li>
+                                <li><b>D (Difusividad):</b> Coeficiente dependiente del material y la temperatura (se ingresa en m²/s).</li>
+                                <li><b>t (Tiempo):</b> Seleccione si el valor ingresado corresponde a segundos (s), minutos (min) o horas (h).</li>
+                            </ul>
+                        </li>
+                        
+                        <li><b>Unidad de Salida:</b> Si su incógnita es "x" (distancia) o "t" (tiempo), aparecerá un recuadro punteado azul donde podrá elegir en qué unidad desea ver el resultado final.</li>
+                    </ol>
+                </div>
+
+                <div style="background: #eef2ff; padding: 25px; border-radius: 10px; border-left: 6px solid #4f46e5;">
+                    <h3 style="color: #3730a3; margin-top: 0;">3. Análisis de Resultados Matemáticos</h3>
+                    <p>Una vez que presione el botón verde <b>"CALCULAR Y GENERAR RESULTADOS"</b>, se desplegarán dos recuadros:</p>
+                    <ul style="padding-left: 20px; color: #312e81;">
+                        <li style="margin-bottom: 10px;"><b>Recuadro Verde (Resultado Principal):</b> Muestra el valor numérico final de la variable que seleccionó como incógnita, con una precisión de 6 decimales.</li>
+                        <li><b>Recuadro Amarillo (Valores de Interpolación):</b> El simulador no usa fórmulas cerradas, sino que interpola linealmente los valores de la Tabla de la Función Error (erf). Esta caja le muestra exactamente qué valores de "z" y "erf(z)" usó el programa (límite inferior y superior) para que usted pueda <b>comprobar el cálculo manualmente</b> en sus talleres de clase.</li>
+                    </ul>
+                </div>
+
+                <div style="border: 1px solid #e1e8ed; padding: 25px; border-radius: 10px;">
+                    <h3 style="color: #e67e22; margin-top: 0;">4. Interpretación de Gráficas y Herramientas (Probes)</h3>
+                    <p style="margin-bottom: 15px;">Para facilitar el diseño ingenieril, todas las gráficas convierten automáticamente las distancias a <b>milímetros (mm)</b>, independientemente de la unidad que haya usado en la entrada.</p>
+
+                    <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+                        <div style="flex: 1; min-width: 300px; background: #fffaf0; padding: 15px; border-radius: 8px; border: 1px solid #fdebd0;">
+                            <h4 style="margin-top: 0; color: #d35400;">Gráfica 1: Perfil de Concentración</h4>
+                            <p style="font-size: 0.9em; color: #555;">Muestra cómo cae la concentración de Carbono (Eje Y) a medida que profundizamos en la pieza (Eje X en mm) para el <strong>tiempo fijo</strong> que usted calculó o ingresó.</p>
+                            <p style="font-size: 0.9em; color: #d35400; font-weight: bold; margin-bottom: 5px;">Botones Interactivos:</p>
+                            <p style="font-size: 0.85em; color: #666; margin-top: 0;">En la casilla <b>"Explorar x (mm)"</b>, puede escribir cualquier profundidad y la casilla contigua <b>"%C result"</b> le dirá exactamente qué concentración de carbono habrá en ese punto específico de la gráfica, sin tener que recalcular todo el sistema.</p>
+                        </div>
+
+                        <div style="flex: 1; min-width: 300px; background: #fdfefe; padding: 15px; border-radius: 8px; border: 1px solid #eaeded;">
+                            <h4 style="margin-top: 0; color: #27ae60;">Gráfica 2: Cinética de Penetración</h4>
+                            <p style="font-size: 0.9em; color: #555;">Muestra cómo avanza la profundidad de capa (Eje Y en mm) a medida que pasan las horas en el horno (Eje X en tiempo). Es una curva parabólica que demuestra que la difusión se vuelve más lenta con el tiempo.</p>
+                            <p style="font-size: 0.9em; color: #27ae60; font-weight: bold; margin-bottom: 5px;">Botones Interactivos:</p>
+                            <p style="font-size: 0.85em; color: #666; margin-top: 0;">En la casilla <b>"Prof. x (mm)"</b>, escriba una profundidad deseada de capa endurecida, y la herramienta <b>"Tiempo req"</b> le dirá cuántas horas/minutos exactos debe dejar la pieza en el horno para alcanzarla.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: #2c3e50; padding: 20px; border-radius: 10px; text-align: center; margin-top: 10px;">
+                    <p style="margin: 0; font-style: italic; color: #ecf0f1; font-size: 1.1em;">
+                        "Recuerde: El simulador asume un modelo de sólido semi-infinito y difusión en estado no estacionario. Siempre valide sus resultados térmicos contra el diagrama de fases Hierro-Carbono ubicado en la pestaña de Teoría."
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </div> </div> 
+
+<footer class="site-footer">
+     <footer>SimuMetalurgia © 2026 <br><br> Desarrollo: <span>Andrés Felipe Caro Miranda & José Gabriel Franco Correa</span>  |  Asesoría: <span>Pro. Ana Emilse Coy Echeverria & Prof. Carlos Andrés Galán Pinilla.</span></footer>
+</footer>
+
+<script>
+    const erfTable = [[0,0],[0.025,0.0282],[0.05,0.0564],[0.1,0.1125],[0.15,0.168],[0.2,0.2227],[0.25,0.2763],[0.3,0.3286],[0.35,0.3794],[0.4,0.4284],[0.45,0.4755],[0.5,0.5205],[0.55,0.5633],[0.6,0.6039],[0.65,0.642],[0.7,0.6778],[0.75,0.7112],[0.8,0.7421],[0.85,0.7707],[0.9,0.797],[0.95,0.8209],[1,0.8427],[1.1,0.8802],[1.2,0.9103],[1.3,0.934],[1.4,0.9523],[1.5,0.9661],[1.6,0.9763],[1.7,0.9838],[1.8,0.9891],[1.9,0.9928],[2,0.9953],[2.2,0.9981],[2.4,0.9993],[2.6,0.9998],[2.8,0.9999]];
+    let chart1, chart2;
+    let lastInterp = { p1: [0,0], p2: [0,0] };
+
+    // Función principal para cambiar entre Simulador y la sección completa de Teoría/Manual
+    function showSection(id) { 
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); 
+        document.getElementById(id).classList.add('active'); 
+    }
+
+    // Función para navegar entre las tres sub-pestañas
+    function showSubTheory(type) {
+        // Apagar todos los contenedores primero
+        document.getElementById('content-t').style.display = 'none';
+        document.getElementById('content-a').style.display = 'none';
+        document.getElementById('content-m').style.display = 'none';
+        
+        // Encender solo el seleccionado
+        document.getElementById('content-' + type).style.display = 'block';
+
+        // Cambiar el estilo de la pestaña activa en el menú
+        document.getElementById('tab-t').className = '';
+        document.getElementById('tab-a').className = '';
+        document.getElementById('tab-m').className = '';
+        document.getElementById('tab-' + type).className = 'active-sub';
+    }
+
+    function toggleInputs() {
+        const inc = document.getElementById('incognita').value;
+        ['Cs','C0','Cx','x','D','t'].forEach(id => document.getElementById('group-'+id).style.display = (id===inc)?'none':'block');
+        const unitC = document.getElementById('unit-incognita-container');
+        if(['x','t'].includes(inc)) {
+            unitC.style.display = 'block';
+            document.getElementById('res-unit').innerHTML = inc==='x'?'<option value="m">m</option><option value="cm">cm</option><option value="mm">mm</option><option value="in">in</option>':'<option value="s">s</option><option value="min">min</option><option value="h">h</option>';
+        } else unitC.style.display = 'none';
+    }
+
+    function getErf(z) {
+        z = Math.abs(z); if(z>=2.8) return 0.9999;
+        for(let i=0; i<erfTable.length-1; i++){
+            if(z>=erfTable[i][0] && z<=erfTable[i+1][0]) {
+                lastInterp.p1 = erfTable[i]; lastInterp.p2 = erfTable[i+1];
+                return erfTable[i][1]+(z-erfTable[i][0])*(erfTable[i+1][1]-erfTable[i][1])/(erfTable[i+1][0]-erfTable[i][0]);
+            }
+        }
+        return 0;
+    }
+
+    function getZ(erfVal) {
+        erfVal = Math.max(0, Math.min(0.9999, erfVal));
+        for(let i=0; i<erfTable.length-1; i++){
+            if(erfVal>=erfTable[i][1] && erfVal<=erfTable[i+1][1]) {
+                lastInterp.p1 = erfTable[i]; lastInterp.p2 = erfTable[i+1];
+                return erfTable[i][0]+(erfVal-erfTable[i][1])*(erfTable[i+1][0]-erfTable[i][0])/(erfTable[i+1][1]-erfTable[i][1]);
+            }
+        }
+        return 0.5;
+    }
+
+    function parseNum(str) { return parseFloat(String(str).replace(',','.')); }
+
+    function calcular() {
+        const inc = document.getElementById('incognita').value;
+        let Cs=parseNum(document.getElementById('val-Cs').value), C0=parseNum(document.getElementById('val-C0').value), Cx=parseNum(document.getElementById('val-Cx').value);
+        let x=parseNum(document.getElementById('val-x').value), D=parseNum(document.getElementById('val-D').value), t=parseNum(document.getElementById('val-t').value);
+        const ux=document.getElementById('unit-x').value, ut=document.getElementById('unit-t').value;
+        
+        let xSI = x; if(ux==='cm') xSI/=100; else if(ux==='mm') xSI/=1000; else if(ux==='in') xSI*=0.0254;
+        let tSI = t; if(ut==='min') tSI*=60; else if(ut==='h') tSI*=3600;
+
+        let res, zCalc, erfCalc;
+        if(inc==='Cx') { zCalc=xSI/(2*Math.sqrt(D*tSI)); erfCalc=getErf(zCalc); res=Cs-(Cs-C0)*erfCalc; Cx=res; }
+        else if(inc==='x') { erfCalc=(Cs-Cx)/(Cs-C0); zCalc=getZ(erfCalc); xSI=zCalc*2*Math.sqrt(D*tSI); res=xSI; const ou=document.getElementById('res-unit').value; if(ou==='cm') res*=100; else if(ou==='mm') res*=1000; x=res; }
+        else if(inc==='t') { erfCalc=(Cs-Cx)/(Cs-C0); zCalc=getZ(erfCalc); tSI=Math.pow(xSI/(2*zCalc),2)/D; res=tSI; const ou=document.getElementById('res-unit').value; if(ou==='min') res/=60; else if(ou==='h') res/=3600; t=res; }
+        else if(inc==='Cs') { zCalc=xSI/(2*Math.sqrt(D*tSI)); erfCalc=getErf(zCalc); Cs=(Cx-C0*erfCalc)/(1-erfCalc); res=Cs; }
+        else if(inc==='C0') { zCalc=xSI/(2*Math.sqrt(D*tSI)); erfCalc=getErf(zCalc); C0=(Cx-Cs*(1-erfCalc))/erfCalc; res=C0; }
+        else if(inc==='D') { erfCalc=(Cs-Cx)/(Cs-C0); zCalc=getZ(erfCalc); D=Math.pow(xSI/(2*zCalc),2)/tSI; res=D; }
+
+        document.getElementById('resultado').style.display='block';
+        document.getElementById('resultado').innerHTML=`<strong>Resultado:</strong> ${res.toLocaleString('es-ES', {minimumFractionDigits: 6})}`;
+        
+        document.getElementById('interp-box').style.display = 'block';
+        document.getElementById('interp-box').innerHTML = `<strong>Valores de Interpolación:</strong><br>Buscado: z=${zCalc.toFixed(4)} | erf(z)=${erfCalc.toFixed(4)}<br><hr style="border:0; border-top:1px solid #ccc; margin:5px 0;">Inf: z=${lastInterp.p1[0]}, erf=${lastInterp.p1[1]} | Sup: z=${lastInterp.p2[0]}, erf=${lastInterp.p2[1]}`;
+
+        actualizarGraficas(Cs, C0, D, tSI, xSI, ut, Cx, zCalc);
+    }
+
+    function actualizarGraficas(Cs, C0, D, tSI, xSI, unitT, Cx, zRef) {
+        // Grafica siempre en mm
+        const labels1=[], data1=[], xMax=xSI*2.5 || 0.005;
+        for(let i=0; i<=xMax; i+=xMax/40){
+            labels1.push((i*1000).toFixed(3)); // Siempre mm
+            data1.push(Cs-(Cs-C0)*getErf(i/(2*Math.sqrt(D*tSI))));
+        }
+        if(chart1) chart1.destroy();
+        chart1 = new Chart(document.getElementById('chart1'), {
+            type:'line', data:{labels:labels1, datasets:[{label:'% Concentración', data:data1, borderColor:'#3498db', tension:0.1}]},
+            options:{ scales:{ x:{title:{display:true,text:'Distancia (mm)'}}, y:{title:{display:true,text:'% Concentración'}} }}
+        });
+
+        const labels2=[], data2=[], tMax=tSI*2 || 36000;
+        for(let i=0; i<=tMax; i+=tMax/40){
+            labels2.push((unitT==='h'?i/3600:unitT==='min'?i/60:i).toFixed(1));
+            let depthMM = zRef*2*Math.sqrt(D*i) * 1000; // Siempre mm
+            data2.push(depthMM);
+        }
+        if(chart2) chart2.destroy();
+        chart2 = new Chart(document.getElementById('chart2'), {
+            type:'line', data:{labels:labels2, datasets:[{label:'Profundidad x (mm)', data:data2, borderColor:'#e67e22'}]},
+            options:{ scales:{ x:{title:{display:true,text:`Tiempo (${unitT})`}}, y:{title:{display:true,text:'Profundidad x (mm)'}} }}
+        });
+
+        // Eventos para los probes en mm
+        document.getElementById('probe-x').oninput = function() {
+            let pxMM = parseNum(this.value); 
+            let pxSI = pxMM / 1000;
+            document.getElementById('probe-c').value = (Cs-(Cs-C0)*getErf(pxSI/(2*Math.sqrt(D*tSI)))).toFixed(4);
+        };
+        document.getElementById('probe-t-x').oninput = function() {
+            let pxMM = parseNum(this.value); 
+            let pxSI = pxMM / 1000;
+            let reqT = Math.pow(pxSI/(2*zRef),2)/D;
+            let resT = (unitT==='h'?reqT/3600:unitT==='min'?reqT/60:reqT);
+            document.getElementById('probe-t-res').value = resT.toFixed(2);
+        };
+    }
+</script>
+</body>
+</html>
